@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <title>T0ZVPN</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://unpkg.com/@phosphor-icons/web@2.1.1"></script>
+  <script src="https://telegram.org/js/telegram-web-app.js"></script>
+  <style>
+    .spot { position: relative; overflow: hidden; }
+    .spot::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      border-radius: inherit;
+      background: radial-gradient(
+        190px circle at var(--mouse-x, -240px) var(--mouse-y, -240px),
+        rgba(255, 255, 255, 0.22),
+        transparent 62%
+      );
+      opacity: 0;
+      transition: opacity 0.45s ease;
+      pointer-events: none;
+      z-index: 1;
+    }
+    .spot.is-lit::after { opacity: 1; }
+    .spot > * { position: relative; z-index: 2; }
+    .sheen {
+      position: absolute;
+      inset: 0;
+      z-index: 0;
+      pointer-events: none;
+      background: linear-gradient(to bottom right, rgba(255, 255, 255, 0.1), transparent 55%);
+    }
+    .blob {
+      position: absolute;
+      border-radius: 999px;
+      filter: blur(100px);
+      opacity: 0.5;
+    }
+  </style>
+</head>
+<body class="min-h-screen bg-[#09090b] font-sans text-white">
+  <div class="pointer-events-none fixed inset-0 overflow-hidden" aria-hidden="true">
+    <span class="blob -left-24 -top-24 h-[420px] w-[420px] bg-violet-600"></span>
+    <span class="blob right-[-140px] top-[22%] h-[380px] w-[380px] bg-blue-600"></span>
+    <span class="blob bottom-[-80px] left-[18%] h-[360px] w-[360px] bg-pink-500"></span>
+  </div>
+
+  <main class="relative z-10 mx-auto flex w-full max-w-[420px] flex-col gap-4 px-4 pb-32 pt-8">
+    <section id="view-home" class="flex flex-col gap-4">
+      <header class="flex items-center justify-center gap-2 py-2">
+        <i class="ph ph-shield-check text-2xl text-violet-200"></i>
+        <h1 class="bg-gradient-to-r from-violet-200 to-blue-300 bg-clip-text text-2xl font-semibold tracking-[0.14em] text-transparent">T0ZVPN</h1>
+      </header>
+
+      <article class="spot rounded-[28px] border border-white/10 bg-white/5 p-6 shadow-2xl backdrop-blur-2xl">
+        <div class="sheen"></div>
+        <p class="text-sm text-gray-400">Подписка</p>
+        <p class="mt-2 text-2xl font-semibold">Статус: Не активен</p>
+        <p class="mt-2 text-sm leading-relaxed text-gray-400">Доступ появится сразу после оплаты. Пока можно копить бонусные дни.</p>
+        <button id="buy-btn" type="button" class="mt-6 w-full rounded-2xl bg-gradient-to-r from-violet-500 to-blue-500 px-4 py-4 text-base font-semibold shadow-lg shadow-violet-900/40 transition active:scale-[0.97]">
+          Купить подписку
+        </button>
+        <p id="buy-note" class="mt-3 min-h-[1.25rem] text-sm text-gray-400"></p>
+      </article>
+
+      <article class="spot rounded-[28px] border border-white/10 bg-white/5 p-6 shadow-2xl backdrop-blur-2xl">
+        <div class="sheen"></div>
+        <h2 class="text-lg font-semibold">О сервисе</h2>
+        <p class="mt-2 text-sm leading-relaxed text-gray-400">T0ZVPN — быстрый и стабильный доступ без лишних настроек. Подключение занимает пару минут, а бонусные дни приходят за приглашённых друзей.</p>
+      </article>
+    </section>
+
+    <section id="view-bonus" class="hidden flex-col gap-4">
+      <header class="py-2 text-center">
+        <h1 class="text-2xl font-semibold">Ваши бонусы</h1>
+      </header>
+
+      <article class="spot rounded-[28px] border border-white/10 bg-white/5 p-6 text-center shadow-2xl backdrop-blur-2xl">
+        <div class="sheen"></div>
+        <p id="bonus-days" class="bg-gradient-to-r from-violet-200 to-blue-300 bg-clip-text text-6xl font-semibold leading-none text-transparent">+0 ДН.</p>
+        <p class="mt-3 text-sm text-gray-400">Накоплено</p>
+      </article>
+
+      <article id="ref-card" class="spot rounded-[28px] border border-white/10 bg-white/5 p-6 shadow-2xl backdrop-blur-2xl">
+        <div class="sheen"></div>
+        <div class="flex items-start justify-between gap-3">
+          <div>
+            <h2 class="text-lg font-semibold">Приглашайте друзей</h2>
+            <p class="mt-1 text-sm text-gray-400">Бонусные дни за каждого друга с подпиской</p>
+          </div>
+          <i class="ph ph-users text-2xl text-gray-200"></i>
+        </div>
+        <div class="mt-5 h-[3px] overflow-hidden rounded-full bg-white/10">
+          <span id="ref-fill" class="block h-full w-0 rounded-full bg-gradient-to-r from-violet-400 to-blue-400"></span>
+        </div>
+        <p id="ref-count" class="mt-3 text-sm text-gray-400">0 активных из 0</p>
+        <div class="mt-4 grid grid-cols-2 gap-3">
+          <button id="ref-tg" type="button" class="spot flex items-center justify-center gap-2 rounded-[15px] border border-white/10 bg-white/5 px-3 py-3 text-sm backdrop-blur-2xl transition active:scale-[0.97]">
+            <div class="sheen"></div>
+            <i class="ph ph-telegram-logo text-lg"></i>
+            Telegram
+          </button>
+          <button id="ref-web" type="button" class="spot flex items-center justify-center gap-2 rounded-[15px] border border-white/10 bg-white/5 px-3 py-3 text-sm backdrop-blur-2xl transition active:scale-[0.97]">
+            <div class="sheen"></div>
+            <i class="ph ph-globe text-lg"></i>
+            Веб-ссылка
+          </button>
+        </div>
+      </article>
+
+      <article class="spot rounded-[28px] border border-white/10 bg-white/5 p-6 shadow-2xl backdrop-blur-2xl">
+        <div class="sheen"></div>
+        <h2 class="text-lg font-semibold">Как получить дни</h2>
+        <ol class="mt-4 space-y-3 text-sm text-gray-400">
+          <li class="flex gap-3"><span class="text-violet-200">01</span> Отправьте ссылку другу.</li>
+          <li class="flex gap-3"><span class="text-violet-200">02</span> Друг подписывается на канал.</li>
+          <li class="flex gap-3"><span class="text-violet-200">03</span> Вам начисляется 2 бонусных дня.</li>
+        </ol>
+      </article>
+    </section>
+  </main>
+
+  <nav class="fixed bottom-4 left-1/2 z-20 w-[min(calc(100%-2rem),420px)] -translate-x-1/2">
+    <div class="grid grid-cols-2 gap-2 rounded-[28px] border border-white/10 bg-white/5 p-2 shadow-2xl backdrop-blur-2xl">
+      <button id="tab-home" type="button" class="grid h-12 place-items-center rounded-2xl bg-gradient-to-r from-violet-500 to-blue-500 text-white" aria-label="Главная">
+        <i class="ph-fill ph-house text-xl"></i>
+      </button>
+      <button id="tab-bonus" type="button" class="grid h-12 place-items-center rounded-2xl text-gray-400" aria-label="Бонусы">
+        <i class="ph ph-gift text-xl"></i>
+      </button>
+    </div>
+  </nav>
+
+  <script>
+    const tg = window.Telegram.WebApp;
+    tg.ready();
+    tg.expand();
+
+    const APP_URL = "https://q9752q-netizen.github.io/tozvpn/";
+    const home = document.getElementById("view-home");
+    const bonus = document.getElementById("view-bonus");
+    const tabHome = document.getElementById("tab-home");
+    const tabBonus = document.getElementById("tab-bonus");
+
+    function referralUrl() {
+      const id = tg.initDataUnsafe?.user?.id || "guest";
+      const url = new URL(APP_URL);
+      url.searchParams.set("ref", String(id));
+      return url.toString();
+    }
+
+    function openExternal(url, telegram) {
+      if (telegram && typeof tg.openTelegramLink === "function") {
+        tg.openTelegramLink(url);
+        return;
+      }
+      if (typeof tg.openLink === "function") {
+        tg.openLink(url);
+        return;
+      }
+      window.open(url, "_blank", "noopener");
+    }
+
+    function show(page) {
+      const isHome = page === "home";
+      home.classList.toggle("hidden", !isHome);
+      home.classList.toggle("flex", isHome);
+      bonus.classList.toggle("hidden", isHome);
+      bonus.classList.toggle("flex", !isHome);
+      tabHome.className = isHome
+        ? "grid h-12 place-items-center rounded-2xl bg-gradient-to-r from-violet-500 to-blue-500 text-white"
+        : "grid h-12 place-items-center rounded-2xl text-gray-400";
+      tabBonus.className = isHome
+        ? "grid h-12 place-items-center rounded-2xl text-gray-400"
+        : "grid h-12 place-items-center rounded-2xl bg-gradient-to-r from-violet-500 to-blue-500 text-white";
+      tabHome.querySelector("i").className = isHome ? "ph-fill ph-house text-xl" : "ph ph-house text-xl";
+      tabBonus.querySelector("i").className = isHome ? "ph ph-gift text-xl" : "ph-fill ph-gift text-xl";
+      window.scrollTo(0, 0);
+    }
+
+    tabHome.addEventListener("click", () => show("home"));
+    tabBonus.addEventListener("click", () => show("bonus"));
+
+    document.getElementById("buy-btn").addEventListener("click", () => {
+      document.getElementById("buy-note").textContent = "Оплата появится здесь, когда её подключим.";
+    });
+
+    document.getElementById("ref-tg").addEventListener("click", () => {
+      const share = `https://t.me/share/url?url=${encodeURIComponent(referralUrl())}&text=${encodeURIComponent("T0ZVPN")}`;
+      openExternal(share, true);
+    });
+
+    document.getElementById("ref-web").addEventListener("click", async () => {
+      const label = document.getElementById("ref-count");
+      const previous = label.textContent;
+      try {
+        await navigator.clipboard.writeText(referralUrl());
+        label.textContent = "Ссылка скопирована";
+        setTimeout(() => {
+          label.textContent = previous;
+        }, 1600);
+      } catch {
+        openExternal(referralUrl(), false);
+      }
+    });
+
+    document.querySelectorAll(".spot").forEach((card) => {
+      const light = (event) => {
+        const point = event.touches ? event.touches[0] : event;
+        const rect = card.getBoundingClientRect();
+        card.style.setProperty("--mouse-x", `${point.clientX - rect.left}px`);
+        card.style.setProperty("--mouse-y", `${point.clientY - rect.top}px`);
+        card.classList.add("is-lit");
+      };
+      const dim = () => card.classList.remove("is-lit");
+      card.addEventListener("pointermove", light);
+      card.addEventListener("pointerdown", light);
+      card.addEventListener("pointerleave", dim);
+      card.addEventListener("pointercancel", dim);
+      card.addEventListener("pointerup", (event) => {
+        if (event.pointerType !== "mouse") dim();
+      });
+    });
+  </script>
+</body>
+</html>
